@@ -1,0 +1,1140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>NoteFlow 2.0</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#f4f4f8;--sf:#fff;--sf2:#ededf3;--sf3:#e4e4ec;
+  --bdr:rgba(0,0,0,0.08);--bdr2:rgba(0,0,0,0.14);
+  --txt:#18182e;--mut:rgba(24,24,46,0.44);--dim:rgba(24,24,46,0.28);
+  --acc:#5b50e8;--acc2:#4740d4;--acl:rgba(91,80,232,0.1);
+  --grn:#10b981;--red:#ef4444;--ylw:#f59e0b;
+  --shadow:0 2px 20px rgba(0,0,0,0.08);--shadow2:0 8px 40px rgba(0,0,0,0.14);
+  --mono:'IBM Plex Mono',monospace;
+}
+@media(prefers-color-scheme:dark){:root{
+  --bg:#0c0c1a;--sf:#121224;--sf2:#191930;--sf3:#20203c;
+  --bdr:rgba(255,255,255,0.08);--bdr2:rgba(255,255,255,0.14);
+  --txt:#e0e0f0;--mut:rgba(224,224,240,0.44);--dim:rgba(224,224,240,0.24);
+  --acl:rgba(91,80,232,0.18);--shadow:0 2px 20px rgba(0,0,0,0.4);--shadow2:0 8px 40px rgba(0,0,0,0.6);
+}}
+html,body{height:100%;font-family:'IBM Plex Sans',system-ui,sans-serif;background:var(--bg);color:var(--txt);overflow:hidden;}
+::-webkit-scrollbar{width:5px;height:5px;}
+::-webkit-scrollbar-track{background:transparent;}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:99px;}
+input,textarea,select{font-family:inherit;color:var(--txt);background:var(--sf2);border:1px solid var(--bdr);border-radius:8px;padding:9px 12px;font-size:13px;outline:none;transition:border-color .15s;}
+input:focus,textarea:focus,select:focus{border-color:var(--acc);}
+input::placeholder,textarea::placeholder{color:var(--dim);}
+button{font-family:inherit;cursor:pointer;transition:all .15s;}
+
+/* LOCK */
+#lock{position:fixed;inset:0;z-index:9999;display:flex;align-items:center;justify-content:center;background:var(--bg);}
+.lcard{background:var(--sf);border:1px solid var(--bdr);border-radius:22px;padding:44px 38px;width:340px;max-width:92vw;text-align:center;box-shadow:var(--shadow2);}
+.licon{font-size:46px;margin-bottom:16px;display:block;}
+.ltitle{font-size:26px;font-weight:700;letter-spacing:-.5px;margin-bottom:4px;}
+.lsub{font-size:12px;color:var(--mut);margin-bottom:26px;font-family:var(--mono);}
+.lbtn{width:100%;padding:13px;border-radius:10px;background:var(--acc);border:none;color:#fff;font-size:14px;font-weight:600;margin-top:10px;}
+.lbtn:hover{background:var(--acc2);}
+.lerr{font-size:12px;color:var(--red);margin-top:10px;min-height:18px;font-family:var(--mono);}
+@keyframes shake{0%,100%{transform:translateX(0)}25%,75%{transform:translateX(-8px)}50%{transform:translateX(8px)}}
+.shake{animation:shake .35s;}
+
+/* LAYOUT */
+#app{display:none;height:100vh;flex-direction:row;}
+#app.show{display:flex;}
+
+/* SIDEBAR */
+#sidebar{width:255px;min-width:255px;display:flex;flex-direction:column;background:var(--sf);border-right:1px solid var(--bdr);overflow:hidden;transition:transform .22s;}
+.s-head{padding:13px 13px 9px;display:flex;align-items:center;gap:7px;border-bottom:1px solid var(--bdr);}
+.logo{font-size:14.5px;font-weight:700;color:var(--acc);letter-spacing:-.3px;flex:1;}
+.logo span{font-size:10px;background:linear-gradient(90deg,var(--acc),#ec4899);-webkit-background-clip:text;-webkit-text-fill-color:transparent;font-weight:600;letter-spacing:.5px;margin-left:4px;vertical-align:middle;}
+.icon-btn{background:none;border:1px solid var(--bdr);border-radius:7px;width:30px;height:30px;display:flex;align-items:center;justify-content:center;color:var(--mut);font-size:14px;}
+.icon-btn:hover{background:var(--sf2);color:var(--txt);}
+.new-note-btn{background:var(--acc);color:#fff;border:none;border-radius:7px;width:30px;height:30px;font-size:22px;display:flex;align-items:center;justify-content:center;}
+.new-note-btn:hover{background:var(--acc2);}
+.s-search{padding:8px 10px;border-bottom:1px solid var(--bdr);}
+#notes-list{flex:1;overflow-y:auto;padding:4px 0;}
+.note-item{padding:8px 12px;cursor:pointer;border-left:3px solid transparent;display:flex;align-items:flex-start;justify-content:space-between;gap:6px;}
+.note-item:hover{background:var(--sf2);}
+.note-item.active{border-left-color:var(--acc);background:var(--acl);}
+.ni-title{font-size:13px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--txt);}
+.ni-meta{font-size:10px;color:var(--dim);margin-top:2px;font-family:var(--mono);}
+.ni-del{background:none;border:none;color:var(--mut);font-size:12px;padding:2px 5px;border-radius:4px;opacity:0;}
+.note-item:hover .ni-del{opacity:1;}
+.ni-del:hover{color:var(--red);}
+.s-foot{padding:9px 10px;border-top:1px solid var(--bdr);display:flex;gap:5px;}
+.sf-btn{flex:1;background:var(--sf2);border:1px solid var(--bdr);border-radius:8px;padding:7px 5px;color:var(--mut);font-size:11.5px;font-weight:500;}
+.sf-btn:hover{color:var(--txt);border-color:var(--bdr2);}
+.sf-btn.syncing{color:var(--acc);}
+.sf-btn.synced{color:var(--grn);}
+.sf-btn.err{color:var(--red);}
+.no-notes{padding:20px;text-align:center;color:var(--dim);font-size:12.5px;}
+
+/* MAIN */
+#main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+
+/* TOOLBAR */
+#toolbar{padding:6px 10px;border-bottom:1px solid var(--bdr);display:flex;gap:3px;flex-wrap:nowrap;align-items:center;background:var(--sf);overflow-x:auto;}
+#toolbar::-webkit-scrollbar{height:0;}
+.tb{background:none;border:1px solid var(--bdr);border-radius:5px;padding:3px 7px;font-size:11.5px;font-weight:600;color:var(--mut);min-width:26px;height:26px;display:flex;align-items:center;justify-content:center;white-space:nowrap;flex-shrink:0;}
+.tb:hover{background:var(--sf2);color:var(--txt);}
+.tb.on{background:var(--acl);color:var(--acc);border-color:var(--acc);}
+.t-div{width:1px;height:16px;background:var(--bdr);margin:0 2px;flex-shrink:0;}
+.t-right{margin-left:auto;display:flex;gap:4px;align-items:center;flex-shrink:0;}
+.view-btn{background:var(--sf2);border:1px solid var(--bdr);border-radius:6px;padding:3px 9px;font-size:11px;color:var(--mut);font-family:var(--mono);}
+.view-btn:hover,.view-btn.on{background:var(--acl);color:var(--acc);border-color:var(--acc);}
+.ai-btn{background:linear-gradient(135deg,var(--acc),#ec4899);color:#fff;border:none;border-radius:7px;padding:4px 13px;font-size:12px;font-weight:600;}
+.ai-btn:hover{opacity:.88;}
+
+/* EDITOR AREA */
+#editor-area{flex:1;display:flex;overflow:hidden;min-height:0;}
+#editor-pane{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0;}
+#md-editor{flex:1;padding:28px 36px;font-family:var(--mono);font-size:14px;line-height:1.8;color:var(--txt);background:var(--bg);border:none;outline:none;resize:none;overflow-y:auto;}
+#md-editor::placeholder{color:var(--dim);}
+#preview-pane{flex:1;overflow-y:auto;padding:28px 36px;border-left:1px solid var(--bdr);background:var(--bg);display:none;}
+#preview-pane.show{display:block;}
+
+/* MARKDOWN PREVIEW */
+.md-preview{font-size:15px;line-height:1.78;color:var(--txt);max-width:720px;}
+.md-preview h1{font-size:1.9em;font-weight:700;margin:0 0 .3em;letter-spacing:-.5px;border-bottom:2px solid var(--bdr);padding-bottom:.3em;}
+.md-preview h2{font-size:1.45em;font-weight:600;margin:1.2em 0 .3em;border-bottom:1px solid var(--bdr);padding-bottom:.2em;}
+.md-preview h3{font-size:1.15em;font-weight:600;margin:1em 0 .25em;}
+.md-preview h4{font-size:1em;font-weight:600;margin:.8em 0 .2em;color:var(--mut);}
+.md-preview p{margin:.5em 0;}
+.md-preview ul,.md-preview ol{padding-left:1.7em;margin:.4em 0;}
+.md-preview li{margin:.2em 0;}
+.md-preview li input[type=checkbox]{margin-right:6px;accent-color:var(--acc);}
+.md-preview code{font-family:var(--mono);background:var(--sf2);padding:2px 6px;border-radius:4px;font-size:.87em;color:#e879f9;}
+.md-preview pre{background:var(--sf3);border-radius:10px;margin:.6em 0;overflow:hidden;}
+.md-preview pre code{display:block;padding:16px;font-size:.86em;color:inherit;background:none;border-radius:0;line-height:1.6;}
+.md-preview blockquote{border-left:3px solid var(--acc);padding-left:16px;color:var(--mut);margin:.6em 0;font-style:italic;}
+.md-preview strong{font-weight:700;}
+.md-preview em{font-style:italic;}
+.md-preview a{color:var(--acc);text-decoration:underline;}
+.md-preview hr{border:none;border-top:1px solid var(--bdr);margin:1.2em 0;}
+.md-preview table{border-collapse:collapse;width:100%;margin:.6em 0;font-size:.92em;}
+.md-preview td,.md-preview th{border:1px solid var(--bdr2);padding:8px 12px;}
+.md-preview th{background:var(--sf2);font-weight:600;}
+.md-preview img{max-width:100%;border-radius:8px;margin:.4em 0;}
+.md-preview .task-list-item{list-style:none;margin-left:-1.2em;}
+
+/* STATUS BAR */
+#statusbar{padding:4px 14px;font-size:10.5px;color:var(--dim);font-family:var(--mono);background:var(--sf);border-top:1px solid var(--bdr);display:flex;gap:16px;align-items:center;}
+.sb-sync{margin-left:auto;color:var(--grn);}
+
+/* AI PANEL */
+#ai-panel{width:300px;min-width:300px;display:flex;flex-direction:column;background:var(--sf);border-left:1px solid var(--bdr);overflow:hidden;transform:translateX(100%);transition:transform .22s;}
+#ai-panel.open{transform:translateX(0);}
+.ai-head{padding:11px 13px;border-bottom:1px solid var(--bdr);display:flex;align-items:center;justify-content:space-between;}
+.ai-title{font-size:13px;font-weight:700;color:var(--acc);}
+.ai-provider{font-family:var(--mono);font-size:10px;background:var(--acl);color:var(--acc);padding:2px 7px;border-radius:99px;}
+.quick-grid{padding:9px;border-bottom:1px solid var(--bdr);display:grid;grid-template-columns:1fr 1fr;gap:5px;}
+.qb{background:var(--sf2);border:1px solid var(--bdr);border-radius:8px;padding:7px 5px;font-size:11px;color:var(--txt);text-align:center;}
+.qb:hover{border-color:var(--acc);color:var(--acc);}
+#ai-msgs{flex:1;overflow-y:auto;padding:11px;display:flex;flex-direction:column;gap:8px;}
+.msg-ai{background:var(--sf2);border-radius:10px 10px 10px 3px;padding:10px 12px;font-size:12.5px;line-height:1.65;max-width:94%;word-break:break-word;}
+.msg-ai code{font-family:var(--mono);background:var(--bg);padding:1px 5px;border-radius:3px;font-size:.88em;}
+.msg-ai pre{font-family:var(--mono);background:var(--bg);padding:10px;border-radius:7px;overflow-x:auto;margin:.4em 0;font-size:.86em;line-height:1.55;}
+.msg-user{background:var(--acc);border-radius:10px 10px 3px 10px;padding:10px 12px;font-size:12.5px;color:#fff;max-width:88%;align-self:flex-end;word-break:break-word;}
+.empty-ai{color:var(--dim);font-size:12.5px;text-align:center;margin:24px auto;line-height:1.7;}
+.apply-btn{display:inline-block;margin-top:7px;background:none;border:1px solid var(--bdr);border-radius:5px;padding:3px 9px;font-size:11px;color:var(--mut);}
+.apply-btn:hover{color:var(--acc);border-color:var(--acc);}
+.insert-btn{display:inline-block;margin-top:7px;margin-left:5px;background:var(--acl);border:1px solid var(--acc);border-radius:5px;padding:3px 9px;font-size:11px;color:var(--acc);}
+.insert-btn:hover{background:var(--acc);color:#fff;}
+.thinking{color:var(--dim);font-style:italic;font-size:12.5px;padding:4px;}
+.ai-foot{border-top:1px solid var(--bdr);padding:9px;}
+.ai-provider-row{display:flex;gap:5px;margin-bottom:7px;align-items:center;}
+.provider-sel{flex:1;font-size:11.5px;padding:5px 8px;font-family:var(--mono);}
+#ai-input{width:100%;font-size:12.5px;padding:8px 11px;resize:none;border-radius:10px;height:38px;overflow:hidden;line-height:1.45;}
+.ai-send-row{display:flex;gap:6px;margin-top:6px;}
+.send-btn{background:var(--acc);border:none;border-radius:8px;width:38px;height:36px;color:#fff;font-size:17px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.send-btn:hover{background:var(--acc2);}
+.api-key-row{display:flex;gap:5px;margin-bottom:6px;}
+.api-key-inp{font-size:11px;padding:5px 8px;flex:1;font-family:var(--mono);}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;z-index:500;backdrop-filter:blur(4px);}
+.modal{background:var(--sf);border-radius:18px;padding:26px;width:420px;max-width:94vw;max-height:90vh;overflow-y:auto;border:1px solid var(--bdr);box-shadow:var(--shadow2);}
+.modal h2{font-size:17px;font-weight:700;margin-bottom:5px;}
+.modal p,.modal-note{font-size:12px;color:var(--mut);line-height:1.65;margin-bottom:12px;}
+.modal label{font-size:12px;font-weight:500;color:var(--mut);display:block;margin:10px 0 4px;}
+.modal a{color:var(--acc);}
+.modal code{background:var(--sf2);padding:1px 6px;border-radius:4px;font-family:var(--mono);font-size:11px;}
+.modal-btns{display:flex;gap:7px;margin-top:16px;flex-wrap:wrap;}
+.btn-p{flex:1;min-width:80px;background:var(--acc);color:#fff;border:none;border-radius:9px;padding:10px;font-size:13px;font-weight:600;}
+.btn-p:hover{background:var(--acc2);}
+.btn-s{flex:1;min-width:80px;background:var(--sf2);color:var(--txt);border:1px solid var(--bdr);border-radius:9px;padding:10px;font-size:13px;}
+.btn-s:hover{border-color:var(--acc2);}
+.toast{position:fixed;bottom:20px;right:20px;background:var(--sf);border:1px solid var(--bdr);border-radius:10px;padding:10px 16px;font-size:13px;box-shadow:var(--shadow2);z-index:9999;transform:translateY(16px);opacity:0;transition:all .25s;pointer-events:none;}
+.toast.show{transform:translateY(0);opacity:1;}
+.toast.ok{border-color:var(--grn);color:var(--grn);}
+.toast.err{border-color:var(--red);color:var(--red);}
+.toast.info{border-color:var(--acc);color:var(--acc);}
+.toast.info{border-color:var(--acc);color:var(--acc);}
+.section-title{font-size:11px;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.8px;margin:14px 0 6px;}
+
+/* MOBILE */
+@media(max-width:700px){
+  #sidebar{position:fixed;inset:0 auto 0 0;z-index:100;width:80vw;max-width:290px;transform:translateX(-110%);padding-bottom:56px;}
+  #sidebar.open{transform:translateX(0);}
+  #ai-panel{position:fixed;inset:0 0 56px auto;z-index:100;width:94vw;max-width:320px;}
+  #md-editor{padding:16px;padding-bottom:70px;}
+  #preview-pane{padding:16px;padding-bottom:70px;}
+  #toolbar{padding:5px 7px;}
+  #mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--bdr);z-index:50;height:56px;}
+  .mob-btn{flex:1;background:none;border:none;color:var(--mut);padding:8px 0 6px;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  .mob-btn.on{color:var(--acc);}
+  .mob-icon{font-size:18px;}
+  #mob-overlay{display:none;position:fixed;inset:0 0 56px 0;z-index:90;background:rgba(0,0,0,.4);}
+  #mob-overlay.show{display:block;}
+  #mob-menu-btn{display:flex!important;}
+}
+@media(min-width:701px){
+  #mob-nav,#mob-overlay{display:none!important;}
+  #mob-menu-btn{display:none!important;}
+}
+</style>
+</head>
+<body>
+
+<!-- LOCK -->
+<div id="lock">
+  <div class="lcard">
+    <span class="licon">✦</span>
+    <div class="ltitle">NoteFlow 2.0</div>
+    <div class="lsub">markdown · ai · sync</div>
+    <input type="password" id="lock-inp" placeholder="PIN (default: 1234)" style="text-align:center;letter-spacing:5px;font-size:18px;" onkeydown="if(event.key==='Enter')unlock();">
+    <button class="lbtn" onclick="unlock()">Unlock →</button>
+    <div class="lerr" id="lock-err"></div>
+    <div style="font-size:11px;color:var(--dim);margin-top:12px;font-family:var(--mono);">Change PIN in ⚙ Settings</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- Sidebar -->
+  <div id="sidebar">
+    <div class="s-head">
+      <div class="logo">✦ NoteFlow<span>2.0</span></div>
+      <button class="new-note-btn" onclick="createNote()" title="New Note (Ctrl+N)">+</button>
+    </div>
+    <div class="s-search">
+      <input id="search" placeholder="Search notes…" oninput="renderList()" style="font-size:12px;padding:6px 10px;">
+    </div>
+    <div id="notes-list"></div>
+    <div class="s-foot">
+      <button id="sync-btn" class="sf-btn" onclick="syncUp()">↑ Sync</button>
+      <button class="sf-btn" onclick="openSettings()">⚙</button>
+    </div>
+  </div>
+
+  <!-- Main -->
+  <div id="main">
+    <!-- Toolbar -->
+    <div id="toolbar">
+      <button class="tb" id="mob-menu-btn" onclick="toggleSidebar()" style="display:none;">≡</button>
+      <!-- Format -->
+      <button class="tb" onclick="ins('**','**')" title="Bold (Ctrl+B)"><b>B</b></button>
+      <button class="tb" onclick="ins('*','*')" title="Italic (Ctrl+I)"><i>I</i></button>
+      <button class="tb" onclick="ins('~~','~~')" title="Strikethrough">S̶</button>
+      <button class="tb" onclick="ins('`','`')" title="Inline code" style="font-family:var(--mono);">`</button>
+      <div class="t-div"></div>
+      <!-- Headings -->
+      <button class="tb" onclick="insLine('# ')" title="Heading 1">H1</button>
+      <button class="tb" onclick="insLine('## ')" title="Heading 2">H2</button>
+      <button class="tb" onclick="insLine('### ')" title="Heading 3">H3</button>
+      <div class="t-div"></div>
+      <!-- Lists -->
+      <button class="tb" onclick="insLine('- ')" title="Bullet list">•</button>
+      <button class="tb" onclick="insLine('1. ')" title="Numbered list">1.</button>
+      <button class="tb" onclick="insLine('- [ ] ')" title="Checkbox">☐</button>
+      <button class="tb" onclick="insLine('> ')" title="Blockquote">"</button>
+      <div class="t-div"></div>
+      <!-- Blocks -->
+      <button class="tb" onclick="insBlock('```\n','\n```')" title="Code block" style="font-family:var(--mono);">&lt;/&gt;</button>
+      <button class="tb" onclick="insLine('---')" title="Divider">—</button>
+      <button class="tb" onclick="insTable()" title="Table">⊞</button>
+      <button class="tb" onclick="insLine('| Col1 | Col2 |\n|------|------|\n| Cell | Cell |')" title="Table row">⊟</button>
+      <div class="t-div"></div>
+      <!-- Actions -->
+      <button class="tb" onclick="undo()" title="Undo (Ctrl+Z)">↩</button>
+      <button class="tb" onclick="redo()" title="Redo">↪</button>
+      <div class="t-right">
+        <button class="view-btn" id="vbtn-edit" onclick="setView('edit')" title="Edit only">Edit</button>
+        <button class="view-btn on" id="vbtn-split" onclick="setView('split')" title="Split view">Split</button>
+        <button class="view-btn" id="vbtn-preview" onclick="setView('preview')" title="Preview only">Preview</button>
+        <button class="ai-btn" onclick="toggleAI()" title="AI Assistant">✦ AI</button>
+      </div>
+    </div>
+
+    <!-- Editor + Preview -->
+    <div id="editor-area">
+      <div id="editor-pane">
+        <textarea id="md-editor" placeholder="Start writing in Markdown…&#10;&#10;# Heading&#10;**bold** *italic* `code`&#10;- list item&#10;- [ ] checkbox&#10;&#10;Press ✦ AI for AI assistance" oninput="onInput()" onkeydown="onKey(event)" onscroll="syncScroll()"></textarea>
+      </div>
+      <div id="preview-pane" class="show">
+        <div class="md-preview" id="preview-content"></div>
+      </div>
+    </div>
+
+    <div id="statusbar">
+      <span id="sb-words">0 words</span>
+      <span id="sb-chars">0 chars</span>
+      <span id="sb-lines">0 lines</span>
+      <span id="sb-note">—</span>
+      <span class="sb-sync" id="sb-sync"></span>
+    </div>
+  </div>
+
+  <!-- AI Panel -->
+  <div id="ai-panel">
+    <div class="ai-head">
+      <span class="ai-title">✦ AI Assistant</span>
+      <span class="ai-provider" id="ai-provider-badge">Claude</span>
+      <button onclick="toggleAI()" style="background:none;border:none;color:var(--mut);font-size:16px;padding:2px 6px;border-radius:4px;margin-left:auto;">✕</button>
+    </div>
+    <div class="quick-grid">
+      <button class="qb" onclick="qa('summarize')">📋 Summarize</button>
+      <button class="qb" onclick="qa('improve')">✨ Improve</button>
+      <button class="qb" onclick="qa('bangla')">🇧🇩 Bangla</button>
+      <button class="qb" onclick="qa('code')">💻 Code Help</button>
+      <button class="qb" onclick="qa('generate')">✦ Generate</button>
+      <button class="qb" onclick="qa('debug')">🐛 Debug</button>
+      <button class="qb" onclick="qa('explain')">📖 Explain</button>
+      <button class="qb" onclick="qa('bullet')">• Bullet List</button>
+      <button class="qb" onclick="qa('table')">⊞ Make Table</button>
+      <button class="qb" onclick="qa('longer')">↕ Make Longer</button>
+    </div>
+    <div id="ai-msgs"></div>
+    <div class="ai-foot">
+      <div class="section-title">Provider & Model</div>
+      <div class="ai-provider-row">
+        <select class="provider-sel" id="provider-sel" onchange="onProviderChange()">
+          <option value="claude">Claude (Anthropic)</option>
+          <option value="openrouter">OpenRouter (Free)</option>
+          <option value="ollama">Ollama (Local)</option>
+          <option value="openai">OpenAI</option>
+          <option value="gemini">Gemini (Google)</option>
+        </select>
+      </div>
+      <div id="api-key-section">
+        <div class="api-key-row">
+          <input class="api-key-inp" type="password" id="api-key-inp" placeholder="API Key…" oninput="S.apiKeys[S.provider]=this.value;saveLocal();">
+          <input class="api-key-inp" id="model-inp" placeholder="Model…" style="max-width:120px;" oninput="S.models[S.provider]=this.value;saveLocal();">
+        </div>
+        <div id="ollama-url-row" style="display:none;margin-bottom:5px;">
+          <input class="api-key-inp" id="ollama-url-inp" placeholder="Ollama URL e.g. http://100.x.x.x:11434" style="max-width:100%;width:100%;" oninput="S.ollamaUrl=this.value;saveLocal();">
+        </div>
+        <div id="provider-hint" style="font-size:10.5px;color:var(--dim);margin-bottom:6px;line-height:1.5;font-family:var(--mono);"></div>
+      </div>
+      <textarea id="ai-input" placeholder="Ask AI or generate note from prompt…" onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();send();}"></textarea>
+      <div class="ai-send-row">
+        <div style="flex:1;font-size:10px;color:var(--dim);font-family:var(--mono);line-height:1.4;">Enter = send<br>Shift+Enter = newline</div>
+        <button class="send-btn" onclick="send()">→</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mobile nav -->
+  <div id="mob-nav">
+    <button class="mob-btn" id="m-notes" onclick="mobNotes()"><span class="mob-icon">≡</span>Notes</button>
+    <button class="mob-btn on" id="m-edit" onclick="mobEdit()"><span class="mob-icon">✏</span>Edit</button>
+    <button class="mob-btn" id="m-preview" onclick="mobPreview()"><span class="mob-icon">👁</span>View</button>
+    <button class="mob-btn" id="m-ai" onclick="mobAI()"><span class="mob-icon">✦</span>AI</button>
+  </div>
+  <div id="mob-overlay" onclick="closeMob()"></div>
+</div>
+
+<!-- Settings Modal -->
+<div class="overlay" id="settings-modal" style="display:none;" onclick="if(event.target===this)closeSettings();">
+  <div class="modal">
+    <h2>⚙ Settings</h2>
+    <div class="section-title">GitHub Gist Sync</div>
+    <p>Sync notes across all devices for free using GitHub Gist.</p>
+    <label>GitHub Token (needs <code>gist</code> scope)</label>
+    <input type="password" id="gh-token" placeholder="ghp_xxxxxxxxxxxx">
+    <div style="font-size:11px;color:var(--dim);margin-top:4px;">Get at <a href="https://github.com/settings/tokens/new?scopes=gist" target="_blank">github.com/settings/tokens</a></div>
+    <label>Gist ID (leave empty on first sync — auto-created)</label>
+    <input id="gh-gist" placeholder="Paste Gist ID from another device…">
+    <div id="gist-id-display" style="font-size:11px;color:var(--mut);margin-top:4px;font-family:var(--mono);word-break:break-all;"></div>
+    <div style="font-size:11px;color:var(--dim);margin-top:2px;line-height:1.5;">After first sync, copy this ID to use on other devices.</div>
+    <div class="section-title">Auto Sync</div>
+    <label><input type="checkbox" id="auto-sync" style="width:auto;margin-right:6px;"> Auto-sync every 5 minutes</label>
+    <div class="section-title">Security</div>
+    <label>Change PIN (4+ digits)</label>
+    <input type="password" id="new-pin" placeholder="New PIN…" maxlength="12">
+    <div class="section-title">Theme</div>
+    <label>Code highlight theme</label>
+    <select id="hl-theme">
+      <option value="github-dark">GitHub Dark</option>
+      <option value="github">GitHub Light</option>
+      <option value="monokai">Monokai</option>
+      <option value="atom-one-dark">Atom One Dark</option>
+    </select>
+    <div class="modal-btns">
+      <button class="btn-p" onclick="saveSettings()">Save & Sync ↑</button>
+      <button class="btn-s" onclick="pullFromGist()">Pull ↓</button>
+      <button class="btn-s" onclick="closeSettings()">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── MARKED CONFIG ──────────────────────────────────────────────
+marked.setOptions({
+  breaks: true, gfm: true,
+  highlight: (code, lang) => {
+    if (lang && hljs.getLanguage(lang)) {
+      try { return hljs.highlight(code, { language: lang }).value; } catch {}
+    }
+    return hljs.highlightAuto(code).value;
+  }
+});
+
+// ── HELPERS ────────────────────────────────────────────────────
+const $=id=>document.getElementById(id);
+const genId=()=>Math.random().toString(36).slice(2,10);
+const nowISO=()=>new Date().toISOString();
+const strip=h=>(h||'').replace(/<[^>]*>/g,'').replace(/\s+/g,' ').trim();
+const fmtDate=d=>new Date(d).toLocaleDateString('en-US',{month:'short',day:'numeric'});
+const esc=s=>(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+// ── STATE ──────────────────────────────────────────────────────
+const WELCOME = {
+  id: genId(), title: '✦ Welcome to NoteFlow 2.0',
+  content: `# ✦ Welcome to NoteFlow 2.0
+
+A **Markdown-first** note-taking app with AI assistance and GitHub Gist sync.
+
+## Markdown Features
+
+**Bold**, *italic*, ~~strikethrough~~, \`inline code\`
+
+### Lists
+- Bullet list item
+- Another item
+  - Nested item
+
+1. Numbered list
+2. Second item
+
+- [ ] Checkbox todo
+- [x] Completed todo
+
+### Code Blocks
+\`\`\`python
+def greet(name):
+    return f"Hello, {name}!"
+
+print(greet("Suman"))
+\`\`\`
+
+### Tables
+| Feature | Status |
+|---------|--------|
+| Markdown | ✅ |
+| AI | ✅ |
+| Sync | ✅ |
+
+### Blockquote
+> "The best tool is the one you actually use."
+
+---
+
+## AI Features
+
+Click **✦ AI** to open the assistant:
+- 📋 Summarize · ✨ Improve · 🇧🇩 Bangla
+- 💻 Code Help · 🐛 Debug · ✦ Generate
+- • Bullet List · ⊞ Make Table · 📖 Explain
+
+## Sync
+
+Go to **⚙ Settings** → add GitHub token → **Save & Sync ↑**
+`,
+  createdAt: nowISO(), updatedAt: nowISO()
+};
+
+let S = {
+  notes: [WELCOME], currentId: WELCOME.id,
+  aiOpen: false, aiMsgs: [], aiLoading: false,
+  provider: 'claude',
+  apiKeys: { claude:'', openrouter:'', ollama:'', openai:'', gemini:'' },
+  models: { claude:'claude-sonnet-4-20250514', openrouter:'google/gemma-3-4b-it:free', ollama:'llama3.1', openai:'gpt-4o-mini', gemini:'gemini-1.5-flash' },
+  ollamaUrl: 'http://localhost:11434',
+  ghToken:'', gistId:'', pin:'1234',
+  syncStatus:'idle', autoSync:true,
+  view: 'split',
+  undoStack:[], redoStack:[],
+};
+
+const PROVIDER_HINTS = {
+  claude: 'Free tier available at console.anthropic.com',
+  openrouter: 'Free models at openrouter.ai — no key needed for some!',
+  ollama: 'Runs locally on your PC. MUST set OLLAMA_ORIGINS=* — see setup guide.',
+  openai: 'Paid API. Get key at platform.openai.com',
+  gemini: 'Free tier at aistudio.google.com'
+};
+
+// ── STORAGE ────────────────────────────────────────────────────
+function saveLocal() {
+  try {
+    localStorage.setItem('nf2_state', JSON.stringify({
+      notes:S.notes, currentId:S.currentId,
+      provider:S.provider, apiKeys:S.apiKeys, models:S.models,
+      ollamaUrl:S.ollamaUrl, ghToken:S.ghToken, gistId:S.gistId,
+      pin:S.pin, autoSync:S.autoSync
+    }));
+  } catch(e) {}
+}
+
+function loadLocal() {
+  try {
+    const d = JSON.parse(localStorage.getItem('nf2_state')||'{}');
+    if (d.notes?.length) S.notes = d.notes;
+    if (d.currentId) S.currentId = d.currentId;
+    if (d.provider) S.provider = d.provider;
+    if (d.apiKeys) S.apiKeys = {...S.apiKeys,...d.apiKeys};
+    if (d.models) S.models = {...S.models,...d.models};
+    if (d.ollamaUrl) S.ollamaUrl = d.ollamaUrl;
+    if (d.ghToken) S.ghToken = d.ghToken;
+    if (d.gistId) S.gistId = d.gistId;
+    if (d.pin) S.pin = d.pin;
+    if (d.autoSync !== undefined) S.autoSync = d.autoSync;
+  } catch(e) {}
+}
+
+// ── LOCK ───────────────────────────────────────────────────────
+function unlock() {
+  const v = $('lock-inp').value;
+  if (v === S.pin) {
+    $('lock').style.display = 'none';
+    $('app').classList.add('show');
+    syncEditorToNote();
+    renderList();
+    updatePreview();
+    updateStatus();
+    updateProviderUI();
+    if (S.autoSync) startAutoSync();
+  } else {
+    const inp = $('lock-inp');
+    inp.classList.add('shake');
+    $('lock-err').textContent = 'Wrong PIN. Try again.';
+    setTimeout(()=>inp.classList.remove('shake'),400);
+  }
+}
+
+// ── NOTE OPS ───────────────────────────────────────────────────
+function cur() { return S.notes.find(n=>n.id===S.currentId); }
+
+function createNote() {
+  flushNote();
+  const n = { id:genId(), title:'New Note', content:'# New Note\n\n', createdAt:nowISO(), updatedAt:nowISO() };
+  S.notes = [n,...S.notes];
+  S.currentId = n.id;
+  saveLocal();
+  renderList();
+  syncEditorToNote();
+  closeMob();
+  setTimeout(()=>{ $('md-editor').focus(); $('md-editor').setSelectionRange(12,12); },80);
+}
+
+function deleteNote(id,ev) {
+  ev.stopPropagation();
+  if (S.notes.length<=1) { toast('Cannot delete the only note.','err'); return; }
+  if (!confirm('Delete this note?')) return;
+  S.notes = S.notes.filter(n=>n.id!==id);
+  if (S.currentId===id) S.currentId=S.notes[0].id;
+  saveLocal(); renderList(); syncEditorToNote();
+}
+
+function selectNote(id) {
+  if (id===S.currentId) { closeMob(); return; }
+  flushNote();
+  S.currentId = id;
+  saveLocal(); renderList(); syncEditorToNote(); closeMob();
+}
+
+function flushNote() {
+  const e = $('md-editor');
+  if (!e) return;
+  const content = e.value;
+  const title = content.replace(/^#+\s*/,'').split('\n')[0]?.trim().slice(0,70) || 'Untitled';
+  S.notes = S.notes.map(n=>n.id===S.currentId?{...n,content,title,updatedAt:nowISO()}:n);
+}
+
+function syncEditorToNote() {
+  const e = $('md-editor');
+  const note = cur();
+  if (e && note) { e.value = note.content||''; updatePreview(); updateStatus(); }
+}
+
+// ── EDITOR ────────────────────────────────────────────────────
+function onInput() {
+  const e = $('md-editor');
+  if (!e) return;
+  const content = e.value;
+  const title = content.replace(/^#+\s*/,'').split('\n')[0]?.trim().slice(0,70)||'Untitled';
+  S.notes = S.notes.map(n=>n.id===S.currentId?{...n,content,title,updatedAt:nowISO()}:n);
+  updatePreview(); updateStatus(); renderListTitles(); saveLocal();
+}
+
+function onKey(ev) {
+  const e = $('md-editor');
+  const start = e.selectionStart, end = e.selectionEnd;
+  const val = e.value;
+  // Tab → insert 2 spaces
+  if (ev.key==='Tab') {
+    ev.preventDefault();
+    e.value = val.slice(0,start)+'  '+val.slice(end);
+    e.selectionStart = e.selectionEnd = start+2;
+    onInput();
+    return;
+  }
+  // Auto-continue lists on Enter
+  if (ev.key==='Enter') {
+    const lineStart = val.lastIndexOf('\n',start-1)+1;
+    const line = val.slice(lineStart,start);
+    const listMatch = line.match(/^(\s*)([-*+]|\d+\.)\s(\[[ x]\]\s)?/);
+    if (listMatch) {
+      ev.preventDefault();
+      const prefix = listMatch[0];
+      const isEmpty = line.trim()===prefix.trim();
+      if (isEmpty) {
+        e.value = val.slice(0,lineStart)+val.slice(start);
+        e.selectionStart = e.selectionEnd = lineStart;
+      } else {
+        let newPrefix = prefix;
+        if (/^\d+\./.test(listMatch[2])) {
+          newPrefix = prefix.replace(/\d+/, n=>parseInt(n)+1);
+        }
+        if (listMatch[3]) newPrefix = newPrefix.replace(/\[[ x]\]/,'[ ]');
+        e.value = val.slice(0,start)+'\n'+newPrefix+val.slice(end);
+        e.selectionStart = e.selectionEnd = start+1+newPrefix.length;
+      }
+      onInput(); return;
+    }
+  }
+  // Ctrl shortcuts
+  if (ev.ctrlKey||ev.metaKey) {
+    if (ev.key==='b') { ev.preventDefault(); ins('**','**'); return; }
+    if (ev.key==='i') { ev.preventDefault(); ins('*','*'); return; }
+    if (ev.key==='n') { ev.preventDefault(); createNote(); return; }
+  }
+}
+
+function ins(before,after) {
+  const e = $('md-editor');
+  const s = e.selectionStart, end = e.selectionEnd;
+  const sel = e.value.slice(s,end);
+  const rep = before+sel+after;
+  e.value = e.value.slice(0,s)+rep+e.value.slice(end);
+  e.selectionStart = sel ? s : s+before.length;
+  e.selectionEnd = sel ? s+rep.length : s+before.length;
+  e.focus(); onInput();
+}
+
+function insLine(prefix) {
+  const e = $('md-editor');
+  const s = e.selectionStart;
+  const val = e.value;
+  const lineStart = val.lastIndexOf('\n',s-1)+1;
+  e.value = val.slice(0,lineStart)+prefix+val.slice(lineStart);
+  e.selectionStart = e.selectionEnd = lineStart+prefix.length;
+  e.focus(); onInput();
+}
+
+function insBlock(before,after) {
+  const e = $('md-editor');
+  const s = e.selectionStart, end = e.selectionEnd;
+  const sel = e.value.slice(s,end);
+  const rep = '\n'+before+(sel||'code here')+after+'\n';
+  e.value = e.value.slice(0,s)+rep+e.value.slice(end);
+  e.selectionStart = e.selectionEnd = s+rep.length;
+  e.focus(); onInput();
+}
+
+function insTable() {
+  const t = '\n| Column 1 | Column 2 | Column 3 |\n|----------|----------|----------|\n| Cell     | Cell     | Cell     |\n| Cell     | Cell     | Cell     |\n';
+  const e = $('md-editor');
+  const s = e.selectionStart;
+  e.value = e.value.slice(0,s)+t+e.value.slice(s);
+  e.selectionStart = e.selectionEnd = s+t.length;
+  e.focus(); onInput();
+}
+
+function undo() { document.execCommand('undo'); }
+function redo() { document.execCommand('redo'); }
+
+function syncScroll() {
+  const editor = $('md-editor');
+  const preview = $('preview-pane');
+  if (!editor||!preview) return;
+  const ratio = editor.scrollTop/(editor.scrollHeight-editor.clientHeight||1);
+  preview.scrollTop = ratio*(preview.scrollHeight-preview.clientHeight);
+}
+
+// ── PREVIEW ────────────────────────────────────────────────────
+function updatePreview() {
+  const e = $('md-editor');
+  const p = $('preview-content');
+  if (!e||!p) return;
+  let md = e.value;
+  md = md.replace(/- \[x\]/gi,'- [x]').replace(/- \[ \]/gi,'- [ ]');
+  try {
+    p.innerHTML = marked.parse(md);
+    p.querySelectorAll('input[type=checkbox]').forEach(cb=>{ cb.disabled=false; cb.addEventListener('change',onCheckbox); });
+    p.querySelectorAll('pre code').forEach(el=>hljs.highlightElement(el));
+    p.querySelectorAll('a').forEach(a=>a.setAttribute('target','_blank'));
+  } catch(e) {}
+}
+
+function onCheckbox(ev) {
+  const cb = ev.target;
+  const idx = [...$('preview-content').querySelectorAll('input[type=checkbox]')].indexOf(cb);
+  const e = $('md-editor');
+  let count = 0;
+  e.value = e.value.replace(/- \[[ x]\]/gi, m => count++===idx ? (cb.checked?'- [x]':'- [ ]') : m);
+  onInput();
+}
+
+function updateStatus() {
+  const e = $('md-editor');
+  if (!e) return;
+  const text = e.value;
+  const words = text.trim()?text.trim().split(/\s+/).length:0;
+  const lines = text.split('\n').length;
+  const note = cur();
+  $('sb-words').textContent = words+' words';
+  $('sb-chars').textContent = text.length+' chars';
+  $('sb-lines').textContent = lines+' lines';
+  $('sb-note').textContent = note?.title||'—';
+}
+
+// ── VIEW MODES ─────────────────────────────────────────────────
+function setView(v) {
+  S.view = v;
+  const editor = $('editor-pane');
+  const preview = $('preview-pane');
+  const e = $('md-editor');
+  if (v==='edit') { editor.style.display='flex'; preview.classList.remove('show'); e.style.display='block'; }
+  else if (v==='preview') { editor.style.display='none'; preview.classList.add('show'); }
+  else { editor.style.display='flex'; preview.classList.add('show'); e.style.display='block'; }
+  ['edit','split','preview'].forEach(k=>{
+    const btn = $('vbtn-'+k);
+    if(btn) btn.classList.toggle('on',k===v);
+  });
+  updatePreview();
+}
+
+// ── RENDER ─────────────────────────────────────────────────────
+function renderList() {
+  const search = ($('search')?.value||'').toLowerCase();
+  const box = $('notes-list');
+  if(!box) return;
+  const f = S.notes.filter(n=>!search||n.title.toLowerCase().includes(search)||n.content.toLowerCase().includes(search));
+  box.innerHTML = f.length
+    ? f.map(n=>`<div class="note-item ${n.id===S.currentId?'active':''}" onclick="selectNote('${n.id}')">
+        <div style="flex:1;min-width:0;">
+          <div class="ni-title">${esc(n.title||'Untitled')}</div>
+          <div class="ni-meta">${fmtDate(n.updatedAt)} · ${n.content.length} chars</div>
+        </div>
+        ${S.notes.length>1?`<button class="ni-del" onclick="deleteNote('${n.id}',event)">✕</button>`:''}
+      </div>`).join('')
+    : `<div class="no-notes">No notes found</div>`;
+}
+
+function renderListTitles() {
+  document.querySelectorAll('.note-item').forEach(el=>{
+    const id = el.onclick?.toString().match(/'([^']+)'/)?.[1];
+    if (id===S.currentId) {
+      const t = el.querySelector('.ni-title');
+      if(t) t.textContent = cur()?.title||'Untitled';
+    }
+  });
+}
+
+// ── SYNC ───────────────────────────────────────────────────────
+function setSyncStatus(s) {
+  S.syncStatus = s;
+  const btn = $('sync-btn');
+  const sb = $('sb-sync');
+  const m = {idle:['↑ Sync','',''],syncing:['⟳ Syncing','syncing','⟳ syncing…'],synced:['✓ Synced','synced','✓ synced'],error:['✗ Error','err','✗ error']};
+  if(btn){btn.textContent=m[s][0];btn.className='sf-btn '+m[s][1];}
+  if(sb){sb.textContent=m[s][2];sb.style.color=s==='synced'?'var(--grn)':s==='error'?'var(--red)':s==='syncing'?'var(--acc)':'';}
+}
+
+async function syncUp() {
+  if(!S.ghToken){openSettings();toast('Add GitHub token in Settings first','err');return;}
+  if(S.syncStatus==='syncing') return;
+  setSyncStatus('syncing'); flushNote();
+  try {
+    const content = JSON.stringify({version:2,notes:S.notes},null,2);
+    const hdrs = {
+      'Authorization':`Bearer ${S.ghToken}`,
+      'Content-Type':'application/json',
+      'Accept':'application/vnd.github+json'
+    };
+    let res;
+    if(S.gistId) {
+      res = await fetch(`https://api.github.com/gists/${S.gistId}`,{method:'PATCH',headers:hdrs,body:JSON.stringify({files:{'noteflow2.json':{content}}})});
+    } else {
+      res = await fetch('https://api.github.com/gists',{method:'POST',headers:hdrs,body:JSON.stringify({description:'NoteFlow 2.0 notes',public:false,files:{'noteflow2.json':{content}}})});
+      if(res.ok){
+        const d=await res.json();
+        S.gistId=d.id;
+        saveLocal();
+        toast('✓ Gist created! ID: '+d.id.slice(0,8)+'...  Copy full ID from Settings for other devices.','ok');
+      }
+    }
+    if(!res.ok) {
+      const err=await res.json().catch(()=>({}));
+      const msg=err.message||`HTTP ${res.status}`;
+      if(res.status===401) throw new Error('Invalid token. Make sure it has gist scope.');
+      if(res.status===404) throw new Error('Gist not found. Clear Gist ID and sync again to create new.');
+      throw new Error(msg);
+    }
+    setSyncStatus('synced'); toast('✓ Synced to GitHub Gist!','ok');
+  } catch(e) {
+    setSyncStatus('error');
+    toast('Sync failed: '+e.message,'err');
+  }
+  setTimeout(()=>setSyncStatus('idle'),4000);
+}
+
+async function pullFromGist() {
+  if(!S.ghToken){toast('Add GitHub token in Settings first','err');return;}
+  if(!S.gistId){toast('Add Gist ID in Settings first','err');return;}
+  setSyncStatus('syncing');
+  try {
+    const res = await fetch(`https://api.github.com/gists/${S.gistId}`,{
+      headers:{
+        'Authorization':`Bearer ${S.ghToken}`,
+        'Accept':'application/vnd.github+json'
+      }
+    });
+    if(res.status===401) throw new Error('Invalid token. Regenerate it with gist scope.');
+    if(res.status===404) throw new Error('Gist not found. Check the Gist ID.');
+    if(!res.ok) throw new Error(`HTTP ${res.status}`);
+    const d = await res.json();
+    if(!d.files||!d.files['noteflow2.json']) throw new Error('noteflow2.json not found in Gist. Push first from another device.');
+    const parsed = JSON.parse(d.files['noteflow2.json'].content||'{}');
+    const notes = parsed.notes || parsed;
+    if(Array.isArray(notes)&&notes.length){
+      S.notes=notes; S.currentId=notes[0].id;
+      saveLocal(); renderList(); syncEditorToNote();
+      closeSettings();
+      toast('✓ '+notes.length+' notes pulled from GitHub!','ok');
+    } else {
+      throw new Error('No notes found in Gist file.');
+    }
+    setSyncStatus('idle');
+  } catch(e) {
+    setSyncStatus('error');
+    toast('Pull failed: '+e.message,'err');
+    setTimeout(()=>setSyncStatus('idle'),3000);
+  }
+}
+
+let autoSyncInterval = null;
+function startAutoSync() {
+  if(autoSyncInterval) clearInterval(autoSyncInterval);
+  autoSyncInterval = setInterval(()=>{ if(S.ghToken) syncUp(); }, 5*60*1000);
+}
+
+window.addEventListener('beforeunload',()=>{ if(S.ghToken) { flushNote(); saveLocal(); } });
+window.addEventListener('visibilitychange',()=>{ if(document.hidden&&S.ghToken) syncUp(); });
+
+// ── SETTINGS ──────────────────────────────────────────────────
+function openSettings() {
+  $('gh-token').value=S.ghToken; $('gh-gist').value=S.gistId;
+  $('new-pin').value=''; $('auto-sync').checked=S.autoSync;
+  if($('gist-id-display')) $('gist-id-display').textContent=S.gistId?('Current Gist ID: '+S.gistId):'No Gist yet — click Save & Sync to create one.';
+  $('settings-modal').style.display='flex';
+}
+function closeSettings(){$('settings-modal').style.display='none';}
+function saveSettings(){
+  S.ghToken=$('gh-token').value.trim();
+  S.gistId=$('gh-gist').value.trim();
+  const p=$('new-pin').value.trim();
+  if(p.length>=4){S.pin=p;toast('PIN updated!','ok');}
+  S.autoSync=$('auto-sync').checked;
+  if(S.autoSync) startAutoSync(); else { clearInterval(autoSyncInterval); autoSyncInterval=null; }
+  const theme=$('hl-theme').value;
+  $('hljs-theme').href=`https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/${theme}.min.css`;
+  saveLocal(); closeSettings(); syncUp();
+}
+
+// ── AI ─────────────────────────────────────────────────────────
+function toggleAI() {
+  S.aiOpen=!S.aiOpen;
+  $('ai-panel').classList.toggle('open',S.aiOpen);
+  if(S.aiOpen&&window.innerWidth<=700){$('sidebar').classList.remove('open');$('mob-overlay').classList.add('show');}
+}
+
+function onProviderChange() {
+  S.provider=$('provider-sel').value;
+  updateProviderUI();
+  saveLocal();
+}
+
+function updateProviderUI() {
+  const sel=$('provider-sel'); if(sel) sel.value=S.provider;
+  const ki=$('api-key-inp'); if(ki) ki.value=S.apiKeys[S.provider]||'';
+  const mi=$('model-inp'); if(mi) mi.value=S.models[S.provider]||'';
+  const hint=$('provider-hint'); if(hint) hint.textContent=PROVIDER_HINTS[S.provider]||'';
+  const badge=$('ai-provider-badge');
+  const names={claude:'Claude',openrouter:'OpenRouter',ollama:'Ollama (Local)',openai:'OpenAI',gemini:'Gemini'};
+  if(badge) badge.textContent=names[S.provider]||S.provider;
+  // Show Ollama URL field only for Ollama
+  const ollamaRow=$('ollama-url-row');
+  if(ollamaRow) ollamaRow.style.display=S.provider==='ollama'?'block':'none';
+  const ou=$('ollama-url-inp'); if(ou) ou.value=S.ollamaUrl||'http://localhost:11434';
+  // Hide API key for ollama
+  const ki2=$('api-key-inp'); if(ki2) ki2.style.display=S.provider==='ollama'?'none':'block';
+}
+
+function addMsg(role,content) {
+  S.aiMsgs.push({id:genId(),role,content});
+  renderMsgs();
+}
+
+function renderMsgs() {
+  const box=$('ai-msgs');
+  if(!box) return;
+  if(!S.aiMsgs.length&&!S.aiLoading){
+    box.innerHTML=`<div class="empty-ai">Use quick actions above<br>or type to get AI help<br>on your notes.</div>`;
+    return;
+  }
+  box.innerHTML=S.aiMsgs.map((m,i)=>{
+    if(m.role==='user') return `<div class="msg-user">${esc(m.content)}</div>`;
+    const safe=m.content
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+      .replace(/```(\w*)\n([\s\S]*?)```/g,'<pre><code>$2</code></pre>')
+      .replace(/`([^`\n]+)`/g,'<code>$1</code>')
+      .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
+      .replace(/\*(.*?)\*/g,'<em>$1</em>')
+      .replace(/\n/g,'<br>');
+    return `<div class="msg-ai">${safe}<br>
+      <button class="apply-btn" onclick="applyMsg(${i})">↙ Replace note</button>
+      <button class="insert-btn" onclick="insertMsg(${i})">+ Insert</button>
+    </div>`;
+  }).join('')+(S.aiLoading?`<div class="thinking">⟳ Thinking…</div>`:'');
+  box.scrollTop=box.scrollHeight;
+}
+
+function applyMsg(i) {
+  const msg=S.aiMsgs[i];
+  if(!msg) return;
+  const clean=msg.content.replace(/```\w*\n?([\s\S]*?)```/g,'$1').trim();
+  const e=$('md-editor');
+  if(e){e.value=clean;onInput();toast('Applied to note!','ok');}
+}
+
+function insertMsg(i) {
+  const msg=S.aiMsgs[i];
+  if(!msg) return;
+  const e=$('md-editor');
+  if(!e) return;
+  const pos=e.selectionStart||e.value.length;
+  const ins='\n\n'+msg.content+'\n';
+  e.value=e.value.slice(0,pos)+ins+e.value.slice(pos);
+  e.selectionStart=e.selectionEnd=pos+ins.length;
+  onInput(); toast('Inserted!','ok');
+}
+
+async function callAI(system,prompt) {
+  const key=S.apiKeys[S.provider];
+  const model=S.models[S.provider];
+  const p=S.provider;
+
+  // ── CLAUDE ──────────────────────────────────────────────────
+  if(p==='claude') {
+    if(!key) throw new Error('No Claude API key. Paste it in the API Key field above.');
+    const r=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'x-api-key':key,
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
+      body:JSON.stringify({model:model||'claude-haiku-4-5',max_tokens:1500,system,messages:[{role:'user',content:prompt}]})
+    });
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message);
+    return d.content[0].text;
+  }
+
+  // ── OPENROUTER ──────────────────────────────────────────────
+  if(p==='openrouter') {
+    if(!key) throw new Error('No OpenRouter API key. Get a free one at openrouter.ai');
+    const r=await fetch('https://openrouter.ai/api/v1/chat/completions',{
+      method:'POST',
+      headers:{
+        'Content-Type':'application/json',
+        'Authorization':`Bearer ${key}`,
+        'HTTP-Referer':window.location.origin,
+        'X-Title':'NoteFlow'
+      },
+      body:JSON.stringify({
+        model:model||'google/gemma-3-4b-it:free',
+        messages:[{role:'system',content:system},{role:'user',content:prompt}],
+        max_tokens:1200
+      })
+    });
+    const d=await r.json();
+    if(d.error) throw new Error(typeof d.error==='object'?d.error.message:d.error);
+    if(!d.choices||!d.choices[0]) throw new Error('Empty response from OpenRouter');
+    return d.choices[0].message.content;
+  }
+
+  // ── OLLAMA (local) ───────────────────────────────────────────
+  if(p==='ollama') {
+    const base=(S.ollamaUrl||'http://localhost:11434').replace(/\/+$/,'');
+    let r;
+    try {
+      r=await fetch(`${base}/api/chat`,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({model:model||'llama3.1',stream:false,messages:[{role:'system',content:system},{role:'user',content:prompt}]})
+      });
+    } catch(e) {
+      throw new Error('Cannot reach Ollama. Make sure OLLAMA_ORIGINS=* is set and Ollama is running. See setup guide.');
+    }
+    if(!r.ok) throw new Error(`Ollama returned ${r.status}. Check model name and OLLAMA_ORIGINS setting.`);
+    const d=await r.json();
+    return d.message?.content||d.response||'No response from Ollama.';
+  }
+
+  // ── OPENAI ──────────────────────────────────────────────────
+  if(p==='openai') {
+    if(!key) throw new Error('No OpenAI API key. Paste it in the API Key field above.');
+    const r=await fetch('https://api.openai.com/v1/chat/completions',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','Authorization':`Bearer ${key}`},
+      body:JSON.stringify({model:model||'gpt-4o-mini',max_tokens:1200,messages:[{role:'system',content:system},{role:'user',content:prompt}]})
+    });
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message);
+    if(!d.choices||!d.choices[0]) throw new Error('Empty response from OpenAI');
+    return d.choices[0].message.content;
+  }
+
+  // ── GEMINI ──────────────────────────────────────────────────
+  if(p==='gemini') {
+    if(!key) throw new Error('No Gemini API key. Get a free one at aistudio.google.com');
+    const mdl=model||'gemini-1.5-flash';
+    const r=await fetch(`https://generativelanguage.googleapis.com/v1beta/models/${mdl}:generateContent?key=${key}`,{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{parts:[{text:system+'\n\n'+prompt}]}],generationConfig:{maxOutputTokens:1200}})
+    });
+    const d=await r.json();
+    if(d.error) throw new Error(d.error.message);
+    if(!d.candidates||!d.candidates[0]) throw new Error('Empty response from Gemini');
+    return d.candidates[0].content.parts[0].text;
+  }
+}
+
+async function qa(action) {
+  flushNote();
+  const note=cur();
+  const txt=note?.content||'';
+  S.aiOpen=true; $('ai-panel').classList.add('open');
+  const cfgs = {
+    summarize:{label:'📋 Summarize',sys:'Summarize this markdown note in 3-4 sentences. Be concise and informative.',prompt:`Summarize:\n\n${txt}`},
+    improve:{label:'✨ Improve writing',sys:'Improve the writing quality, clarity, grammar and flow of this markdown note. Return improved markdown only, preserve all headings and structure.',prompt:`Improve:\n\n${txt}`},
+    bangla:{label:'🇧🇩 Translate to Bangla',sys:'Translate this markdown note accurately to Bangla. Preserve markdown formatting.',prompt:`Translate to Bangla:\n\n${txt}`},
+    code:{label:'💻 Code help',sys:'You are an expert developer. Help write, explain and improve code. Always use markdown code blocks with language tags.',prompt:`Help with this:\n\n${txt}`},
+    generate:{label:'✦ Generate note',sys:'Generate a well-structured, comprehensive markdown note with headings, lists, and code examples where relevant. Use proper markdown formatting.',prompt:`Generate a detailed note about: ${txt.slice(0,200)||'a useful developer topic'}`},
+    debug:{label:'🐛 Debug code',sys:'You are an expert debugger. Find bugs, explain issues, and provide corrected code in markdown code blocks.',prompt:`Debug this code:\n\n${txt}`},
+    explain:{label:'📖 Explain this',sys:'Explain this content clearly and thoroughly. Use simple language and examples. Format as markdown.',prompt:`Explain:\n\n${txt}`},
+    bullet:{label:'• Make bullet list',sys:'Convert this content into a well-organized markdown bullet list. Group related items. Return markdown only.',prompt:`Make bullet list from:\n\n${txt}`},
+    table:{label:'⊞ Make table',sys:'Convert this content into a well-structured markdown table with headers. Return only the markdown table.',prompt:`Make a markdown table from:\n\n${txt}`},
+    longer:{label:'↕ Make longer',sys:'Expand and elaborate on this markdown note with more detail, examples, and explanations. Preserve and enhance the markdown structure.',prompt:`Expand this note:\n\n${txt}`},
+  };
+  const cfg=cfgs[action];
+  if(!cfg) return;
+  if(!txt.trim()&&!['generate'].includes(action)){addMsg('ai','⚠ Please write something in the note first.');return;}
+  addMsg('user',cfg.label);
+  S.aiLoading=true; renderMsgs();
+  try { addMsg('ai',await callAI(cfg.sys,cfg.prompt)); }
+  catch(e){addMsg('ai',`⚠ Error: ${e.message||'Please check your API key and try again.'}`);}
+  S.aiLoading=false; renderMsgs();
+}
+
+async function send() {
+  const inp=$('ai-input');
+  const msg=inp?.value.trim();
+  if(!msg) return;
+  inp.value='';
+  flushNote();
+  const note=cur();
+  const ctx=(note?.content||'').slice(0,3000);
+  addMsg('user',msg);
+  S.aiLoading=true; renderMsgs();
+  try {
+    const r=await callAI(
+      `You are an AI assistant in NoteFlow, a markdown note-taking app.\nCurrent note: "${note?.title||'Untitled'}"\nContent:\n${ctx}\n\nBe concise and helpful. Always use markdown formatting. For code, use fenced code blocks with language tags.`,
+      msg
+    );
+    addMsg('ai',r);
+  } catch(e){addMsg('ai',`⚠ Error: ${e.message||'Try again.'}`);}
+  S.aiLoading=false; renderMsgs();
+}
+
+// ── MOBILE ────────────────────────────────────────────────────
+function toggleSidebar(){
+  const s=$('sidebar');
+  const open=s.classList.toggle('open');
+  $('mob-overlay').classList.toggle('show',open);
+}
+function mobNotes(){$('sidebar').classList.add('open');$('ai-panel').classList.remove('open');$('mob-overlay').classList.add('show');setMobNav('notes');}
+function mobEdit(){closeMob();setView('edit');setMobNav('edit');}
+function mobPreview(){closeMob();setView('preview');setMobNav('preview');}
+function mobAI(){$('ai-panel').classList.add('open');$('sidebar').classList.remove('open');$('mob-overlay').classList.add('show');S.aiOpen=true;setMobNav('ai');}
+function closeMob(){$('sidebar').classList.remove('open');$('ai-panel').classList.remove('open');$('mob-overlay').classList.remove('show');S.aiOpen=false;}
+function setMobNav(v){['notes','edit','preview','ai'].forEach(k=>{const el=$('m-'+k);if(el)el.classList.toggle('on',k===v);});}
+
+// ── TOAST ─────────────────────────────────────────────────────
+let toastTimer;
+function toast(msg,type='ok'){
+  const el=$('toast');
+  el.textContent=msg;el.className=`toast ${type} show`;
+  clearTimeout(toastTimer);
+  const dur=type==='info'?4500:3500;
+  toastTimer=setTimeout(()=>el.classList.remove('show'),dur);
+}
+
+// ── INIT ──────────────────────────────────────────────────────
+loadLocal();
+setView('split');
+renderMsgs();
+updateProviderUI();
+// Auto-pull on startup if token+gistId exist
+if(S.ghToken && S.gistId) {
+  setTimeout(()=>{
+    toast('↓ Auto-pulling latest notes…','info');
+    pullFromGist();
+  }, 1200);
+}
+window.addEventListener('resize',()=>{const m=window.innerWidth<=700;$('mob-menu-btn').style.display=m?'flex':'none';});
+document.addEventListener('keydown',ev=>{
+  if(ev.key==='Enter'&&$('lock').style.display!=='none')unlock();
+});
+window.addEventListener('load',()=>{const m=window.innerWidth<=700;$('mob-menu-btn').style.display=m?'flex':'none';});
+$('lock-inp').focus();
+</script>
+</body>
+</html>
