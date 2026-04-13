@@ -2,9 +2,17 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
 <title>NoteFlow 2.0</title>
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✦</text></svg>">
+<meta name="description" content="AI-powered markdown notes with GitHub sync">
+<meta name="theme-color" content="#5b50e8">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="NoteFlow">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b50e8'/><text x='50' y='72' font-size='62' text-anchor='middle' fill='white'>✦</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%235b50e8'/><text x='50' y='72' font-size='62' text-anchor='middle' fill='white'>✦</text></svg>">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-theme">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.6/marked.min.js"></script>
@@ -183,19 +191,45 @@ button{font-family:inherit;cursor:pointer;transition:all .15s;}
 
 /* MOBILE */
 @media(max-width:700px){
-  #sidebar{position:fixed;inset:0 auto 0 0;z-index:100;width:80vw;max-width:290px;transform:translateX(-110%);padding-bottom:56px;}
+  html,body{font-size:16px;}
+  #sidebar{position:fixed;inset:0 auto 0 0;z-index:100;width:82vw;max-width:300px;transform:translateX(-110%);padding-bottom:64px;}
   #sidebar.open{transform:translateX(0);}
-  #ai-panel{position:fixed;inset:0 0 56px auto;z-index:100;width:94vw;max-width:320px;}
-  #md-editor{padding:16px;padding-bottom:70px;}
-  #preview-pane{padding:16px;padding-bottom:70px;}
-  #toolbar{padding:5px 7px;}
-  #mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--bdr);z-index:50;height:56px;}
-  .mob-btn{flex:1;background:none;border:none;color:var(--mut);padding:8px 0 6px;font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:2px;}
+  #ai-panel{position:fixed;inset:0 0 64px auto;z-index:100;width:96vw;max-width:340px;}
+  #md-editor{padding:18px 16px;padding-bottom:80px;font-size:16px!important;line-height:1.85;}
+  #preview-pane{padding:18px 16px;padding-bottom:80px;}
+  #toolbar{padding:6px 8px;gap:4px;}
+  .tb{min-width:32px;height:32px;font-size:13px;}
+  .md-preview{font-size:16px;line-height:1.82;}
+  .md-preview h1{font-size:1.6em;}
+  .md-preview h2{font-size:1.35em;}
+  .md-preview h3{font-size:1.15em;}
+  .md-preview code{font-size:.9em;}
+  .md-preview pre code{font-size:.88em;}
+  .ni-title{font-size:15px;}
+  .ni-meta{font-size:12px;}
+  .logo{font-size:17px;}
+  .sf-btn{font-size:13px;padding:8px 6px;}
+  .msg-ai,.msg-user{font-size:14px;line-height:1.7;}
+  .qb{font-size:13px;padding:9px 6px;}
+  .ai-title{font-size:15px;}
+  input,textarea,select{font-size:16px!important;}
+  .modal h2{font-size:19px;}
+  .modal p,.modal-note{font-size:14px;}
+  .modal label{font-size:14px;}
+  .btn-p,.btn-s{font-size:14px;padding:12px;}
+  .lcard{padding:36px 28px;}
+  .ltitle{font-size:28px;}
+  .lsub{font-size:13px;}
+  .lbtn{font-size:16px;padding:14px;}
+  #statusbar{font-size:12px;padding:5px 14px;}
+  #mob-nav{display:flex;position:fixed;bottom:0;left:0;right:0;background:var(--sf);border-top:1px solid var(--bdr);z-index:50;height:64px;}
+  .mob-btn{flex:1;background:none;border:none;color:var(--mut);padding:9px 0 7px;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:3px;}
   .mob-btn.on{color:var(--acc);}
-  .mob-icon{font-size:18px;}
-  #mob-overlay{display:none;position:fixed;inset:0 0 56px 0;z-index:90;background:rgba(0,0,0,.4);}
+  .mob-icon{font-size:22px;}
+  #mob-overlay{display:none;position:fixed;inset:0 0 64px 0;z-index:90;background:rgba(0,0,0,.4);}
   #mob-overlay.show{display:block;}
   #mob-menu-btn{display:flex!important;}
+  .install-btn{display:flex!important;}
 }
 @media(min-width:701px){
   #mob-nav,#mob-overlay{display:none!important;}
@@ -233,6 +267,9 @@ button{font-family:inherit;cursor:pointer;transition:all .15s;}
     <div class="s-foot">
       <button id="sync-btn" class="sf-btn" onclick="syncUp()">↑ Sync</button>
       <button class="sf-btn" onclick="openSettings()">⚙</button>
+    </div>
+    <div id="install-bar" style="display:none;padding:8px 10px;border-top:1px solid var(--bdr);">
+      <button onclick="installPWA()" style="width:100%;background:linear-gradient(135deg,var(--acc),#ec4899);color:#fff;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:600;font-family:inherit;">📲 Install App</button>
     </div>
   </div>
 
@@ -349,6 +386,7 @@ button{font-family:inherit;cursor:pointer;transition:all .15s;}
     <button class="mob-btn on" id="m-edit" onclick="mobEdit()"><span class="mob-icon">✏</span>Edit</button>
     <button class="mob-btn" id="m-preview" onclick="mobPreview()"><span class="mob-icon">👁</span>View</button>
     <button class="mob-btn" id="m-ai" onclick="mobAI()"><span class="mob-icon">✦</span>AI</button>
+    <button class="mob-btn install-btn" id="m-install" onclick="installPWA()" style="display:none;"><span class="mob-icon">⬇</span>Install</button>
   </div>
   <div id="mob-overlay" onclick="closeMob()"></div>
 </div>
@@ -381,7 +419,7 @@ button{font-family:inherit;cursor:pointer;transition:all .15s;}
     </select>
     <div class="modal-btns">
       <button class="btn-p" onclick="saveSettings()">Save & Sync ↑</button>
-      <button class="btn-s" onclick="saveTokenThenPull()">Pull ↓</button>
+      <button class="btn-s" onclick="pullFromGist()">Pull ↓</button>
       <button class="btn-s" onclick="closeSettings()">Cancel</button>
     </div>
   </div>
@@ -526,6 +564,12 @@ function unlock() {
     updateStatus();
     updateProviderUI();
     if (S.autoSync) startAutoSync();
+    // Show iOS install hint if not installed and on iOS
+    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+    const isInstalled = window.navigator.standalone === true || window.matchMedia('(display-mode: standalone)').matches;
+    if (isIOS && !isInstalled) {
+      setTimeout(() => toast('📲 iOS: tap Share → Add to Home Screen to install', 'info'), 2000);
+    }
   } else {
     const inp = $('lock-inp');
     inp.classList.add('shake');
@@ -829,24 +873,12 @@ async function pullFromGist() {
     const d = await res.json();
     if(!d.files||!d.files['noteflow2.json']) throw new Error('noteflow2.json not found in Gist. Push first from another device.');
     const parsed = JSON.parse(d.files['noteflow2.json'].content||'{}');
-    const gistNotes = parsed.notes || parsed;
-    if(Array.isArray(gistNotes)&&gistNotes.length){
-      // Smart merge — never lose local notes
-      const merged = [...S.notes];
-      gistNotes.forEach(gn => {
-        const local = merged.find(n => n.id === gn.id);
-        if (!local) {
-          merged.push(gn);
-        } else if (new Date(gn.updatedAt) > new Date(local.updatedAt)) {
-          merged[merged.indexOf(local)] = gn;
-        }
-      });
-      merged.sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt));
-      S.notes = merged;
-      S.currentId = merged[0].id;
+    const notes = parsed.notes || parsed;
+    if(Array.isArray(notes)&&notes.length){
+      S.notes=notes; S.currentId=notes[0].id;
       saveLocal(); renderList(); syncEditorToNote();
       closeSettings();
-      toast('✓ Merged '+merged.length+' notes from all devices!','ok');
+      toast('✓ '+notes.length+' notes pulled from GitHub!','ok');
     } else {
       throw new Error('No notes found in Gist file.');
     }
@@ -875,22 +907,6 @@ function openSettings() {
   $('settings-modal').style.display='flex';
 }
 function closeSettings(){$('settings-modal').style.display='none';}
-function saveTokenThenPull() {
-  // Read inputs first before pulling
-  const t = $('gh-token').value.trim();
-  const g = $('gh-gist').value.trim();
-  const p = $('new-pin').value.trim();
-  if (!t) { toast('Paste your GitHub token first', 'err'); return; }
-  if (!g) { toast('Paste your Gist ID first', 'err'); return; }
-  // Save to state immediately
-  S.ghToken = t;
-  S.gistId = g;
-  if (p.length >= 4) S.pin = p;
-  S.autoSync = $('auto-sync').checked;
-  saveLocal();
-  // Now pull
-  pullFromGist();
-}
 function saveSettings(){
   S.ghToken=$('gh-token').value.trim();
   S.gistId=$('gh-gist').value.trim();
@@ -1152,51 +1168,10 @@ renderMsgs();
 updateProviderUI();
 // Auto-pull on startup if token+gistId exist
 if(S.ghToken && S.gistId) {
-  setTimeout(async ()=>{
-    try {
-      const res = await fetch(`https://api.github.com/gists/${S.gistId}`,{
-        headers:{
-          'Authorization':`Bearer ${S.ghToken}`,
-          'Accept':'application/vnd.github+json'
-        }
-      });
-      if(!res.ok) return;
-      const d = await res.json();
-      if(!d.files||!d.files['noteflow2.json']) return;
-      const parsed = JSON.parse(d.files['noteflow2.json'].content||'{}');
-      const gistNotes = parsed.notes || [];
-      if(!gistNotes.length) return;
-
-      // SMART MERGE: combine local + gist, keep newest version of each note
-      const merged = [...S.notes];
-      gistNotes.forEach(gn => {
-        const local = merged.find(n => n.id === gn.id);
-        if (!local) {
-          // New note from another device — add it
-          merged.push(gn);
-        } else if (new Date(gn.updatedAt) > new Date(local.updatedAt)) {
-          // Gist version is newer — update local
-          const idx = merged.indexOf(local);
-          merged[idx] = gn;
-        }
-        // else: local is newer or same — keep local
-      });
-
-      // Sort by updatedAt descending
-      merged.sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt));
-
-      const hadChanges = merged.length !== S.notes.length ||
-        merged.some((n,i)=>n.id!==S.notes[i]?.id||n.updatedAt!==S.notes[i]?.updatedAt);
-
-      if(hadChanges){
-        S.notes = merged;
-        saveLocal();
-        renderList();
-        syncEditorToNote();
-        toast('✓ Merged '+merged.length+' notes from all devices','ok');
-      }
-    } catch(e){ /* silent fail on startup */ }
-  }, 1500);
+  setTimeout(()=>{
+    toast('↓ Auto-pulling latest notes…','info');
+    pullFromGist();
+  }, 1200);
 }
 window.addEventListener('resize',()=>{const m=window.innerWidth<=700;$('mob-menu-btn').style.display=m?'flex':'none';});
 document.addEventListener('keydown',ev=>{
@@ -1204,6 +1179,52 @@ document.addEventListener('keydown',ev=>{
 });
 window.addEventListener('load',()=>{const m=window.innerWidth<=700;$('mob-menu-btn').style.display=m?'flex':'none';});
 $('lock-inp').focus();
+
+// ── PWA INSTALL ───────────────────────────────────────────────
+let pwaInstallPrompt = null;
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  pwaInstallPrompt = e;
+  // Show install button in mobile nav
+  const btn = $('m-install');
+  if (btn) btn.style.display = 'flex';
+  // Show install bar in sidebar
+  const bar = $('install-bar');
+  if (bar) bar.style.display = 'block';
+  // Show install toast after 3s
+  setTimeout(() => toast('📲 Tap Install to add NoteFlow to home screen!', 'info'), 3000);
+});
+
+async function installPWA() {
+  if (!pwaInstallPrompt) {
+    // iOS fallback — show instructions
+    toast('On iOS: tap Share → Add to Home Screen', 'info');
+    return;
+  }
+  pwaInstallPrompt.prompt();
+  const result = await pwaInstallPrompt.userChoice;
+  if (result.outcome === 'accepted') {
+    toast('✅ NoteFlow installed! Open from home screen.', 'ok');
+    pwaInstallPrompt = null;
+    const btn = $('m-install');
+    if (btn) btn.style.display = 'none';
+  }
+}
+
+window.addEventListener('appinstalled', () => {
+  toast('✅ NoteFlow installed successfully!', 'ok');
+  pwaInstallPrompt = null;
+});
+
+// Service Worker registration
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(() => console.log('NoteFlow SW registered'))
+      .catch(() => console.log('SW registration skipped'));
+  });
+}
 </script>
 </body>
 </html>
