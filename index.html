@@ -381,7 +381,7 @@ button{font-family:inherit;cursor:pointer;transition:all .15s;}
     </select>
     <div class="modal-btns">
       <button class="btn-p" onclick="saveSettings()">Save & Sync ↑</button>
-      <button class="btn-s" onclick="pullFromGist()">Pull ↓</button>
+      <button class="btn-s" onclick="saveTokenThenPull()">Pull ↓</button>
       <button class="btn-s" onclick="closeSettings()">Cancel</button>
     </div>
   </div>
@@ -863,6 +863,22 @@ function openSettings() {
   $('settings-modal').style.display='flex';
 }
 function closeSettings(){$('settings-modal').style.display='none';}
+function saveTokenThenPull() {
+  // Read inputs first before pulling
+  const t = $('gh-token').value.trim();
+  const g = $('gh-gist').value.trim();
+  const p = $('new-pin').value.trim();
+  if (!t) { toast('Paste your GitHub token first', 'err'); return; }
+  if (!g) { toast('Paste your Gist ID first', 'err'); return; }
+  // Save to state immediately
+  S.ghToken = t;
+  S.gistId = g;
+  if (p.length >= 4) S.pin = p;
+  S.autoSync = $('auto-sync').checked;
+  saveLocal();
+  // Now pull
+  pullFromGist();
+}
 function saveSettings(){
   S.ghToken=$('gh-token').value.trim();
   S.gistId=$('gh-gist').value.trim();
