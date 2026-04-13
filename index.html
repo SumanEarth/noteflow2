@@ -829,12 +829,24 @@ async function pullFromGist() {
     const d = await res.json();
     if(!d.files||!d.files['noteflow2.json']) throw new Error('noteflow2.json not found in Gist. Push first from another device.');
     const parsed = JSON.parse(d.files['noteflow2.json'].content||'{}');
-    const notes = parsed.notes || parsed;
-    if(Array.isArray(notes)&&notes.length){
-      S.notes=notes; S.currentId=notes[0].id;
+    const gistNotes = parsed.notes || parsed;
+    if(Array.isArray(gistNotes)&&gistNotes.length){
+      // Smart merge — never lose local notes
+      const merged = [...S.notes];
+      gistNotes.forEach(gn => {
+        const local = merged.find(n => n.id === gn.id);
+        if (!local) {
+          merged.push(gn);
+        } else if (new Date(gn.updatedAt) > new Date(local.updatedAt)) {
+          merged[merged.indexOf(local)] = gn;
+        }
+      });
+      merged.sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt));
+      S.notes = merged;
+      S.currentId = merged[0].id;
       saveLocal(); renderList(); syncEditorToNote();
       closeSettings();
-      toast('✓ '+notes.length+' notes pulled from GitHub!','ok');
+      toast('✓ Merged '+merged.length+' notes from all devices!','ok');
     } else {
       throw new Error('No notes found in Gist file.');
     }
@@ -1140,10 +1152,51 @@ renderMsgs();
 updateProviderUI();
 // Auto-pull on startup if token+gistId exist
 if(S.ghToken && S.gistId) {
-  setTimeout(()=>{
-    toast('↓ Auto-pulling latest notes…','info');
-    pullFromGist();
-  }, 1200);
+  setTimeout(async ()=>{
+    try {
+      const res = await fetch(`https://api.github.com/gists/${S.gistId}`,{
+        headers:{
+          'Authorization':`Bearer ${S.ghToken}`,
+          'Accept':'application/vnd.github+json'
+        }
+      });
+      if(!res.ok) return;
+      const d = await res.json();
+      if(!d.files||!d.files['noteflow2.json']) return;
+      const parsed = JSON.parse(d.files['noteflow2.json'].content||'{}');
+      const gistNotes = parsed.notes || [];
+      if(!gistNotes.length) return;
+
+      // SMART MERGE: combine local + gist, keep newest version of each note
+      const merged = [...S.notes];
+      gistNotes.forEach(gn => {
+        const local = merged.find(n => n.id === gn.id);
+        if (!local) {
+          // New note from another device — add it
+          merged.push(gn);
+        } else if (new Date(gn.updatedAt) > new Date(local.updatedAt)) {
+          // Gist version is newer — update local
+          const idx = merged.indexOf(local);
+          merged[idx] = gn;
+        }
+        // else: local is newer or same — keep local
+      });
+
+      // Sort by updatedAt descending
+      merged.sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt));
+
+      const hadChanges = merged.length !== S.notes.length ||
+        merged.some((n,i)=>n.id!==S.notes[i]?.id||n.updatedAt!==S.notes[i]?.updatedAt);
+
+      if(hadChanges){
+        S.notes = merged;
+        saveLocal();
+        renderList();
+        syncEditorToNote();
+        toast('✓ Merged '+merged.length+' notes from all devices','ok');
+      }
+    } catch(e){ /* silent fail on startup */ }
+  }, 1500);
 }
 window.addEventListener('resize',()=>{const m=window.innerWidth<=700;$('mob-menu-btn').style.display=m?'flex':'none';});
 document.addEventListener('keydown',ev=>{
